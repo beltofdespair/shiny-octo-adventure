@@ -1,17 +1,32 @@
 use crate::util::error;
 use bevy::render::settings::{WgpuFeatures, WgpuSettings};
 use bevy::render::RenderPlugin;
+// use bevy::window::WindowMode;
+// use bevy::window::WindowResolution;
 use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
 use std::io::Cursor;
 use winit::window::Icon;
 
-/// Overrides the default Bevy plugins and configures things like the screen settings.
+/// Stores the various window-resolutions we can select between.
+// #[derive(Resource)]
+// struct ResolutionSettings {
+//     large: Vec2,
+//     medium: Vec2,
+//     small: Vec2,
+// }
+
+/// Overrides the default Bevy plugins and configures things like the screen
+/// settings.
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(
         DefaultPlugins
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "Foxtrot".to_string(),
+                    // resizable: false,
+                    // resolution: WindowResolution::new(1920.0, 1080.0)
+                    //     .with_scale_factor_override(2.0),
+                    // mode: WindowMode::BorderlessFullscreen,
+                    title: "Shiny Octo Adventure".to_string(),
                     ..default()
                 }),
                 ..default()
@@ -21,8 +36,14 @@ pub(super) fn plugin(app: &mut App) {
                 synchronous_pipeline_compilation: false,
             }),
     )
-    .insert_resource(Msaa::Sample4)
+    // .insert_resource(Msaa::Sample4)
+    // .insert_resource(ResolutionSettings {
+    //     large: Vec2::new(1920.0, 1080.0),
+    //     medium: Vec2::new(1280.0, 720.0),
+    //     small: Vec2::new(640.0, 360.0),
+    // })
     .insert_resource(ClearColor(Color::rgb(0.4, 0.4, 0.4)))
+    // .add_systems(Update, toggle_resolution)
     .add_systems(Startup, set_window_icon.pipe(error));
 }
 
@@ -55,3 +76,25 @@ fn set_window_icon(
     };
     Ok(())
 }
+
+// / This system shows how to request the window to a new resolution
+// fn toggle_resolution(
+//     keys: Res<ButtonInput<KeyCode>>,
+//     mut windows: Query<&mut Window>,
+//     resolution: Res<ResolutionSettings>,
+// ) {
+//     let mut window = windows.single_mut();
+
+//     if keys.just_pressed(KeyCode::Digit1) {
+//         let res = resolution.small;
+//         window.resolution.set(res.x, res.y);
+//     }
+//     if keys.just_pressed(KeyCode::Digit2) {
+//         let res = resolution.medium;
+//         window.resolution.set(res.x, res.y);
+//     }
+//     if keys.just_pressed(KeyCode::Digit3) {
+//         let res = resolution.large;
+//         window.resolution.set(res.x, res.y);
+//     }
+// }

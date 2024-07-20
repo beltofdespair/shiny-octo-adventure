@@ -3,7 +3,8 @@ use crate::{
     player_control::camera::{
         cursor::grab_cursor,
         focus::set_camera_focus,
-        kind::{update_drivers, update_kind},
+        kind::update_drivers,
+        // kind::_update_kind,
         rig::update_rig,
     },
     GameState,
@@ -21,7 +22,9 @@ mod kind;
 mod rig;
 mod ui;
 
-#[derive(Debug, Clone, PartialEq, Component, Reflect, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Component, Reflect, Serialize, Deserialize,
+)]
 #[reflect(Component, Serialize, Deserialize)]
 pub(crate) struct IngameCamera {
     pub(crate) target: Vec3,
@@ -44,15 +47,16 @@ impl Default for IngameCamera {
 #[derive(Debug, Clone, PartialEq, Reflect, Serialize, Deserialize, Default)]
 #[reflect(Serialize, Deserialize)]
 pub(crate) enum IngameCameraKind {
-    #[default]
     ThirdPerson,
+    #[default]
     FirstPerson,
     FixedAngle,
 }
 
 /// Handles the main ingame camera, i.e. not the UI camera in the menu.
-/// Cameras are controlled with [`CameraAction`](crate::player_control::actions::CameraAction). Depending on the distance, a first person,
-/// third person or fixed angle camera is used.
+/// Cameras are controlled with
+/// [`CameraAction`](crate::player_control::actions::CameraAction). Depending on
+/// the distance, a first person, third person or fixed angle camera is used.
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(AtmospherePlugin)
         .register_type::<UiCamera>()
@@ -66,7 +70,7 @@ pub(super) fn plugin(app: &mut App) {
             Update,
             (
                 grab_cursor,
-                update_kind,
+                // update_kind,
                 update_drivers,
                 set_camera_focus,
                 update_rig,

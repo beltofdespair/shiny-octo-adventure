@@ -9,7 +9,8 @@ use bevy::prelude::*;
 use bevy_dolly::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-pub(super) fn update_kind(
+// #[allow(dead_code)]
+pub(super) fn _update_kind(
     mut camera_query: Query<(&mut IngameCamera, &ActionState<CameraAction>)>,
     config: Res<GameConfig>,
 ) {
@@ -18,21 +19,26 @@ pub(super) fn update_kind(
         let zoomed_out = zoom < -1e-5;
         let zoomed_in = zoom > 1e-5;
         let new_kind = match camera.kind {
-            IngameCameraKind::FirstPerson if zoomed_out => Some(IngameCameraKind::ThirdPerson),
+            IngameCameraKind::FirstPerson if zoomed_out => {
+                Some(IngameCameraKind::ThirdPerson)
+            }
             IngameCameraKind::ThirdPerson
-                if camera.desired_distance < config.camera.third_person.min_distance + 1e-5
+                if camera.desired_distance
+                    < config.camera.third_person.min_distance + 1e-5
                     && zoomed_in =>
             {
                 Some(IngameCameraKind::FirstPerson)
             }
             IngameCameraKind::ThirdPerson
-                if camera.desired_distance > config.camera.third_person.max_distance - 1e-5
+                if camera.desired_distance
+                    > config.camera.third_person.max_distance - 1e-5
                     && zoomed_out =>
             {
                 Some(IngameCameraKind::FixedAngle)
             }
             IngameCameraKind::FixedAngle
-                if camera.desired_distance < config.camera.fixed_angle.min_distance + 1e-5
+                if camera.desired_distance
+                    < config.camera.fixed_angle.min_distance + 1e-5
                     && zoomed_in =>
             {
                 Some(IngameCameraKind::ThirdPerson)
@@ -45,7 +51,9 @@ pub(super) fn update_kind(
     }
 }
 
-pub(super) fn update_drivers(mut camera_query: Query<(&IngameCamera, &mut Rig)>) {
+pub(super) fn update_drivers(
+    mut camera_query: Query<(&IngameCamera, &mut Rig)>,
+) {
     for (camera, mut rig) in camera_query.iter_mut() {
         match camera.kind {
             IngameCameraKind::ThirdPerson => set_third_person_drivers(&mut rig),
@@ -90,10 +98,9 @@ trait RigExt {
 
 impl RigExt for Rig {
     fn remove_driver<T: RigDriverTraits>(&mut self) {
-        let index = self
-            .drivers
-            .iter()
-            .position(|driver| driver.as_ref().as_any().downcast_ref::<T>().is_some());
+        let index = self.drivers.iter().position(|driver| {
+            driver.as_ref().as_any().downcast_ref::<T>().is_some()
+        });
         if let Some(index) = index {
             self.drivers.remove(index);
         }

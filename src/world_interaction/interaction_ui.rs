@@ -1,9 +1,11 @@
 use crate::system_set::GameSystemSet;
-use crate::util::{single, single_mut};
+use crate::util::single;
+use crate::util::single_mut;
 use crate::{
     level_instantiation::on_spawn::Player,
     player_control::{
-        actions::{ActionsFrozen, PlayerAction},
+        // actions::ActionsFrozen,
+        actions::PlayerAction,
         camera::{IngameCamera, IngameCameraKind},
     },
     util::is_frozen,
@@ -30,7 +32,17 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Resource, Reflect, Serialize, Deserialize, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Resource,
+    Reflect,
+    Serialize,
+    Deserialize,
+    Default,
+)]
 #[reflect(Resource, Serialize, Deserialize)]
 struct InteractionOpportunity(Option<Entity>);
 
@@ -51,7 +63,8 @@ fn update_interaction_opportunities(
 
     for &sensor in collisions.0.iter() {
         // A dialog collider is valid for any of its ancestors
-        let mut ancestors = iter::once(sensor).chain(parents.iter_ancestors(sensor));
+        let mut ancestors =
+            iter::once(sensor).chain(parents.iter_ancestors(sensor));
 
         // Check if what we are colliding with is a dialog target
         let Some((target, target_transform)) =
@@ -96,7 +109,7 @@ fn display_interaction_prompt(
     actions: Query<&ActionState<PlayerAction>>,
     primary_windows: Query<&Window, With<PrimaryWindow>>,
     dialog_target_query: Query<(Entity, &YarnNode)>,
-    mut freeze: ResMut<ActionsFrozen>,
+    // mut freeze: ResMut<ActionsFrozen>,
     mut current_dialog_target: ResMut<CurrentDialogTarget>,
 ) {
     let Some(opportunity) = interaction_opportunity.0 else {
@@ -104,21 +117,28 @@ fn display_interaction_prompt(
     };
     let window = single!(primary_windows);
     let mut dialogue_runner = single_mut!(dialogue_runner);
-
     let (entity, dialog_target) = dialog_target_query.get(opportunity).unwrap();
-    egui::Window::new("Interaction")
-        .collapsible(false)
-        .title_bar(false)
-        .auto_sized()
-        .fixed_pos(egui::Pos2::new(window.width() / 2., window.height() / 2.))
-        .show(egui_contexts.ctx_mut(), |ui| {
-            ui.label("E: Talk");
-        });
-    for actions in actions.iter() {
-        if actions.just_pressed(&PlayerAction::Interact) {
-            dialogue_runner.start_node(&dialog_target.0);
-            current_dialog_target.0.replace(entity);
-            freeze.freeze();
+    if !dialogue_runner.is_running() {
+        egui::Window::new("Interaction")
+            .collapsible(false)
+            .title_bar(false)
+            .auto_sized()
+            // .fixed_pos(egui::Pos2::new(window.width() / 2., window.height() /
+            // 2.))
+            .current_pos(egui::Pos2::new(
+                window.width() / 2.,
+                window.height() / 2.,
+            ))
+            .show(egui_contexts.ctx_mut(), |ui| {
+                // ui.label("E: Talk");
+                ui.label("Greet");
+            });
+        for actions in actions.iter() {
+            if actions.just_pressed(&PlayerAction::Interact) {
+                dialogue_runner.start_node(&dialog_target.0);
+                current_dialog_target.0.replace(entity);
+                // freeze.freeze();
+            }
         }
     }
 }

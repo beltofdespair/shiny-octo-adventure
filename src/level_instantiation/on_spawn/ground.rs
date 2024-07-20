@@ -2,7 +2,17 @@ use crate::GameState;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Component,
+    Reflect,
+    Serialize,
+    Deserialize,
+    Default,
+)]
 #[reflect(Component, Serialize, Deserialize)]
 pub(crate) struct Ground;
 
@@ -20,7 +30,8 @@ fn spawn(
         for child in children.iter() {
             if let Ok(material_handle) = material_handles.get(*child) {
                 let material = materials.get_mut(material_handle).unwrap();
-                // Blender doesn't export this unfortunately, so we'll have to fix the glossy ground manually
+                // Blender doesn't export this unfortunately, so we'll have to
+                // fix the glossy ground manually
                 material.reflectance = 0.05;
             }
         }

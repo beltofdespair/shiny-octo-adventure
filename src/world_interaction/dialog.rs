@@ -1,5 +1,5 @@
 use crate::player_control::actions::ActionsFrozen;
-use crate::GameSystemSet;
+// use crate::GameSystemSet;
 use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
 use bevy_yarnspinner::{events::DialogueCompleteEvent, prelude::*};
@@ -16,7 +16,7 @@ pub(super) fn plugin(app: &mut App) {
         Update,
         (
             spawn_dialogue_runner.run_if(resource_added::<YarnProject>),
-            unfreeze_after_dialog.in_set(GameSystemSet::Dialog),
+            // unfreeze_after_dialog.in_set(GameSystemSet::Dialog),
         )
             .chain(),
     )
@@ -25,11 +25,24 @@ pub(super) fn plugin(app: &mut App) {
     .register_type::<CurrentDialogTarget>();
 }
 
-#[derive(Component, Debug, Clone, Eq, PartialEq, Reflect, Serialize, Deserialize)]
+#[derive(
+    Component, Debug, Clone, Eq, PartialEq, Reflect, Serialize, Deserialize,
+)]
 #[reflect(Component, Serialize, Deserialize)]
 pub(crate) struct YarnNode(pub(crate) String);
 
-#[derive(Resource, Debug, Clone, Copy, Eq, PartialEq, Reflect, Serialize, Deserialize, Default)]
+#[derive(
+    Resource,
+    Debug,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Reflect,
+    Serialize,
+    Deserialize,
+    Default,
+)]
 #[reflect(Resource, Serialize, Deserialize)]
 pub(crate) struct CurrentDialogTarget(pub(crate) Option<Entity>);
 
@@ -40,7 +53,7 @@ fn spawn_dialogue_runner(mut commands: Commands, project: Res<YarnProject>) {
     commands.spawn(dialogue_runner);
 }
 
-fn unfreeze_after_dialog(
+fn _unfreeze_after_dialog(
     mut dialogue_complete_event: EventReader<DialogueCompleteEvent>,
     mut dialog_target: ResMut<CurrentDialogTarget>,
     mut freeze: ResMut<ActionsFrozen>,

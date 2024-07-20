@@ -10,11 +10,16 @@ use iyes_progress::{ProgressCounter, ProgressPlugin};
 /// See assets/main.assets.ron for the actual paths used.
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(TomlAssetPlugin::<GameConfig>::new(&["game.toml"]))
-        .add_plugins(ProgressPlugin::new(GameState::Loading).continue_to(GameState::Menu))
+        .add_plugins(
+            ProgressPlugin::new(GameState::Loading)
+                .continue_to(GameState::Menu),
+        )
         .add_loading_state(
             LoadingState::new(GameState::Loading)
                 .continue_to_state(GameState::Menu)
-                .with_dynamic_assets_file::<StandardDynamicAssetCollection>("main.assets.ron")
+                .with_dynamic_assets_file::<StandardDynamicAssetCollection>(
+                    "main.assets.ron",
+                )
                 .load_collection::<AudioAssets>()
                 .load_collection::<GltfAssets>()
                 .load_collection::<TextureAssets>()
@@ -25,8 +30,8 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Update, update_config);
 }
 
-// the following asset collections will be loaded during the State `GameState::InitialLoading`
-// when done loading, they will be inserted as resources (see <https://github.com/NiklasEi/bevy_asset_loader>)
+// the following asset collections will be loaded during the State
+// `GameState::InitialLoading` when done loading, they will be inserted as resources (see <https://github.com/NiklasEi/bevy_asset_loader>)
 
 #[derive(AssetCollection, Resource, Clone)]
 pub(crate) struct AudioAssets {
@@ -80,7 +85,10 @@ fn show_progress(
                 ui.heading("Loading");
                 ui.label("Loading assets...");
                 ui.add(
-                    ProgressBar::new(progress.done as f32 / progress.total as f32).animate(true),
+                    ProgressBar::new(
+                        progress.done as f32 / progress.total as f32,
+                    )
+                    .animate(true),
                 );
                 ui.add_space(100.0);
                 ui.add_enabled_ui(false, |ui| {
@@ -103,7 +111,8 @@ fn update_config(
     let _span = info_span!("update_config").entered();
     for event in config_asset_events.read() {
         match event {
-            AssetEvent::Modified { id } | AssetEvent::LoadedWithDependencies { id } => {
+            AssetEvent::Modified { id }
+            | AssetEvent::LoadedWithDependencies { id } => {
                 // Guaranteed by Bevy to not fail
                 let config = config.get(*id).unwrap();
                 commands.insert_resource(config.clone());

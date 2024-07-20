@@ -18,8 +18,10 @@ use bevy_kira_audio::AudioInstance;
 use bevy_tnua::{builtins::TnuaBuiltinWalk, controller::TnuaController};
 use leafwing_input_manager::prelude::ActionState;
 
-/// This plugin handles everything that has to do with the player's physical representation in the world.
-/// This includes movement and rotation that differ from the way the [`crate::movement::plugin`] already handles characters in general.
+/// This plugin handles everything that has to do with the player's physical
+/// representation in the world. This includes movement and rotation that differ
+/// from the way the [`crate::movement::plugin`] already handles characters in
+/// general.
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Timer>()
         .register_type::<Player>()
@@ -37,16 +39,24 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 
-fn handle_jump(mut player_query: Query<(&ActionState<PlayerAction>, &mut Jump), With<Player>>) {
-    #[cfg(feature = "tracing")]
-    let _span = info_span!("handle_jump").entered();
+fn handle_jump(
+    mut player_query: Query<
+        (&ActionState<PlayerAction>, &mut Jump),
+        With<Player>,
+    >,
+) {
+    // #[cfg(feature = "tracing")]
+    // let _span = info_span!("handle_jump").entered();
     for (actions, mut jump) in &mut player_query {
         jump.requested |= actions.pressed(&PlayerAction::Jump);
     }
 }
 
 fn handle_horizontal_movement(
-    mut player_query: Query<(&ActionState<PlayerAction>, &mut Walk, &mut Sprinting), With<Player>>,
+    mut player_query: Query<
+        (&ActionState<PlayerAction>, &mut Walk, &mut Sprinting),
+        With<Player>,
+    >,
     camera_query: Query<(&IngameCamera, &Transform), Without<Player>>,
 ) {
     #[cfg(feature = "tracing")]
@@ -95,12 +105,15 @@ fn handle_camera_kind(
         for (mut player_transform, mut visibility) in with_player.iter_mut() {
             match camera.kind {
                 IngameCameraKind::FirstPerson => {
-                    let horizontal_direction = camera_transform.forward().horizontal();
-                    let looking_target = player_transform.translation + horizontal_direction;
+                    let horizontal_direction =
+                        camera_transform.forward().horizontal();
+                    let looking_target =
+                        player_transform.translation + horizontal_direction;
                     player_transform.look_at(looking_target, Vec3::Y);
                     *visibility = Visibility::Hidden;
                 }
-                IngameCameraKind::ThirdPerson | IngameCameraKind::FixedAngle => {
+                IngameCameraKind::ThirdPerson
+                | IngameCameraKind::FixedAngle => {
                     *visibility = Visibility::Inherited;
                 }
             }
@@ -110,7 +123,10 @@ fn handle_camera_kind(
 
 fn rotate_to_speaker(
     dialog_target: Res<CurrentDialogTarget>,
-    mut with_player: Query<(&Transform, &mut TnuaController, &FloatHeight), With<Player>>,
+    mut with_player: Query<
+        (&Transform, &mut TnuaController, &FloatHeight),
+        With<Player>,
+    >,
     speakers: Query<&Transform, Without<Player>>,
 ) {
     let Some(dialog_target) = dialog_target.0 else {
@@ -119,9 +135,12 @@ fn rotate_to_speaker(
 
     #[cfg(feature = "tracing")]
     let _span = info_span!("rotate_to_speaker").entered();
-    let (player_transform, mut controller, float_height) = single_mut!(with_player);
+    let (player_transform, mut controller, float_height) =
+        single_mut!(with_player);
     let speaker_transform = speakers.get(dialog_target).unwrap();
-    let direction = (speaker_transform.translation - player_transform.translation).horizontal();
+    let direction = (speaker_transform.translation
+        - player_transform.translation)
+        .horizontal();
     controller.basis(TnuaBuiltinWalk {
         desired_forward: direction.normalize_or_zero(),
         float_height: float_height.0,
@@ -142,11 +161,15 @@ fn control_walking_sound(
         let audio_instance = audio_instances
             .get_mut(&audio.walking)
             .context("Failed to get audio instance from handle")?;
-        let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
+        let Some((_, basis_state)) =
+            controller.concrete_basis::<TnuaBuiltinWalk>()
+        else {
             continue;
         };
-        let has_horizontal_movement = !basis_state.running_velocity.horizontal().is_approx_zero();
-        let is_moving_on_ground = has_horizontal_movement && !controller.is_airborne()?;
+        let has_horizontal_movement =
+            !basis_state.running_velocity.horizontal().is_approx_zero();
+        let is_moving_on_ground =
+            has_horizontal_movement && !controller.is_airborne()?;
         if is_moving_on_ground && !time.is_paused() {
             audio_instance.resume(default());
         } else {

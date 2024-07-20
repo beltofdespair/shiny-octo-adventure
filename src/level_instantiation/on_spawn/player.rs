@@ -1,8 +1,12 @@
 use crate::{
-    movement::{character_controller::CharacterControllerBundle, physics::CollisionLayer},
+    movement::{
+        character_controller::CharacterControllerBundle,
+        physics::CollisionLayer,
+    },
     particles,
     player_control::actions::{
-        create_player_action_input_manager_bundle, create_ui_action_input_manager_bundle,
+        create_player_action_input_manager_bundle,
+        create_ui_action_input_manager_bundle,
     },
     GameState,
 };
@@ -13,7 +17,17 @@ use serde::{Deserialize, Serialize};
 pub(crate) const HEIGHT: f32 = 0.4;
 pub(crate) const RADIUS: f32 = 0.3;
 
-#[derive(Debug, Clone, Eq, PartialEq, Component, Reflect, Serialize, Deserialize, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Component,
+    Reflect,
+    Serialize,
+    Deserialize,
+    Default,
+)]
 #[reflect(Component, Serialize, Deserialize)]
 pub(crate) struct Player;
 
@@ -28,7 +42,11 @@ fn spawn(
     mut effects: ResMut<Assets<EffectAsset>>,
 ) {
     for (entity, transform) in player.iter() {
-        let mut controller = CharacterControllerBundle::capsule(HEIGHT, RADIUS, transform.scale.y);
+        let mut controller = CharacterControllerBundle::capsule(
+            HEIGHT,
+            RADIUS,
+            transform.scale.y,
+        );
         controller.collision_layers.memberships |= CollisionLayer::Player;
 
         commands
@@ -39,7 +57,8 @@ fn spawn(
                 create_ui_action_input_manager_bundle(),
             ))
             .with_children(|parent| {
-                let particle_bundle = particles::create_sprint_particle_bundle(&mut effects);
+                let particle_bundle =
+                    particles::create_sprint_particle_bundle(&mut effects);
                 parent.spawn(particle_bundle);
             });
     }

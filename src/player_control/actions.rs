@@ -1,6 +1,6 @@
-use crate::util::is_frozen;
+// use crate::util::is_frozen;
 use bevy::prelude::*;
-use leafwing_input_manager::plugin::InputManagerSystem;
+// use leafwing_input_manager::plugin::InputManagerSystem;
 use leafwing_input_manager::{axislike::DualAxisData, prelude::*};
 use serde::{Deserialize, Serialize};
 
@@ -28,20 +28,22 @@ pub(super) fn plugin(app: &mut App) {
         .register_type::<UiAction>()
         .register_type::<ActionsFrozen>()
         .init_resource::<ActionsFrozen>()
+        // .add_systems(
+        //     Update,
+        // remove_actions_when_frozen
+        //     .run_if(is_frozen)
+        //     .in_set(InputManagerSystem::ManualControl),
+        // )
         .add_plugins((
             InputManagerPlugin::<PlayerAction>::default(),
             InputManagerPlugin::<CameraAction>::default(),
             InputManagerPlugin::<UiAction>::default(),
-        ))
-        .add_systems(
-            Update,
-            remove_actions_when_frozen
-                .run_if(is_frozen)
-                .in_set(InputManagerSystem::ManualControl),
-        );
+        ));
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Actionlike, Reflect, Default)]
+#[derive(
+    Debug, Clone, Copy, Eq, PartialEq, Hash, Actionlike, Reflect, Default,
+)]
 pub(crate) enum PlayerAction {
     #[default]
     Move,
@@ -63,20 +65,23 @@ pub(crate) enum UiAction {
     TogglePause,
 }
 
-pub(crate) fn create_player_action_input_manager_bundle() -> InputManagerBundle<PlayerAction> {
+pub(crate) fn create_player_action_input_manager_bundle()
+-> InputManagerBundle<PlayerAction> {
     InputManagerBundle {
         input_map: InputMap::new([
             (PlayerAction::Jump, KeyCode::Space),
             (PlayerAction::Sprint, KeyCode::ShiftLeft),
-            (PlayerAction::Interact, KeyCode::KeyE),
+            // (PlayerAction::Interact, KeyCode::KeyE),
         ])
+        .insert(PlayerAction::Interact, MouseButton::Left)
         .insert(PlayerAction::Move, VirtualDPad::wasd())
         .build(),
         ..default()
     }
 }
 
-pub(crate) fn create_camera_action_input_manager_bundle() -> InputManagerBundle<CameraAction> {
+pub(crate) fn create_camera_action_input_manager_bundle()
+-> InputManagerBundle<CameraAction> {
     InputManagerBundle {
         input_map: InputMap::default()
             .insert(CameraAction::Orbit, DualAxis::mouse_motion())
@@ -86,21 +91,24 @@ pub(crate) fn create_camera_action_input_manager_bundle() -> InputManagerBundle<
     }
 }
 
-pub(crate) fn create_ui_action_input_manager_bundle() -> InputManagerBundle<UiAction> {
+pub(crate) fn create_ui_action_input_manager_bundle()
+-> InputManagerBundle<UiAction> {
     InputManagerBundle {
         input_map: InputMap::new([(UiAction::TogglePause, KeyCode::Escape)]),
         ..default()
     }
 }
 
-fn remove_actions_when_frozen(mut player_actions_query: Query<&mut ActionState<PlayerAction>>) {
-    for mut player_actions in player_actions_query.iter_mut() {
-        player_actions
-            .action_data_mut_or_default(&PlayerAction::Move)
-            .axis_pair = Some(default());
-        player_actions.consume_all();
-    }
-}
+// fn remove_actions_when_frozen(
+//     mut player_actions_query: Query<&mut ActionState<PlayerAction>>,
+// ) {
+//     for mut player_actions in player_actions_query.iter_mut() {
+//         player_actions
+//             .action_data_mut_or_default(&PlayerAction::Move)
+//             .axis_pair = Some(default());
+//         player_actions.consume_all();
+//     }
+// }
 
 pub(crate) trait DualAxisDataExt {
     fn max_normalized(self) -> Option<Vec2>;

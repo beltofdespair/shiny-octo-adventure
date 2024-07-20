@@ -6,6 +6,7 @@ dist/
 saves/
 
 assets/scenes/*-[1-9].scn.ron
+assets/main.assets.ron.bak
 blender_assets.cats.txt*
 *.blend1
 
@@ -13,3 +14,4 @@ trace-*.json
 
 .cargo/config.toml
 rust-toolchain.toml
+rust-toolchain
